@@ -1,0 +1,62 @@
+-- Loader - RGB hub
+-- Autor: black_19
+-- Delta Executor (troca rápida)
+
+-- Carrega o script original
+loadstring(game:HttpGet("https://raw.githubusercontent.com/agresiv111/script/refs/heads/main/main.lua"))()
+
+local CoreGui = game:GetService("CoreGui")
+local RunService = game:GetService("RunService")
+
+local targetLabel
+local startTime = tick()
+
+-- RGB leve
+local function RGB()
+    return Color3.fromHSV((tick() * 0.2) % 1, 1, 1)
+end
+
+-- Busca rápida pelo título
+local function findLabel()
+    for _, v in ipairs(CoreGui:GetDescendants()) do
+        if v:IsA("TextLabel") then
+            local t = v.Text
+            if t and (t:find("whoam") or t:find("v1")) then
+                return v
+            end
+        end
+    end
+end
+
+task.spawn(function()
+    -- FASE 1: busca agressiva (primeiros 3s)
+    while not targetLabel and tick() - startTime < 3 do
+        targetLabel = findLabel()
+        task.wait() -- sem delay real
+    end
+
+    -- FASE 2: fallback (caso UI seja lenta)
+    while not targetLabel do
+        targetLabel = findLabel()
+        task.wait(0.1)
+    end
+
+    -- Aplica imediatamente
+    targetLabel.Text = "RGB hub"
+    targetLabel.Font = Enum.Font.GothamBold
+    targetLabel.TextScaled = true
+
+    -- Glow simples (Delta-safe)
+    targetLabel.TextStrokeTransparency = 0.25
+    targetLabel.TextStrokeColor3 = Color3.new(1, 1, 1)
+
+    -- Manutenção + RGB
+    RunService.RenderStepped:Connect(function()
+        if targetLabel and targetLabel.Parent then
+            local c = RGB()
+            targetLabel.Text = "RGB hub"
+            targetLabel.TextColor3 = c
+            targetLabel.TextStrokeColor3 = c
+        end
+    end)
+end)
